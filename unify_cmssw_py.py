@@ -5,6 +5,8 @@ import shutil
 import argparse
 import cPickle as pickle
 
+from utility.exceptions import ExceptionFrame
+
 def write_unification(root, **kwargs):
     """
     Write down the meta-data of a unification
@@ -173,5 +175,6 @@ CLI.add_argument(
 
 
 if __name__ == "__main__":
-    args = CLI.parse_args()
-    unify(root=args.root, collection_paths=args.packages, copy=args.copy, dry_run=args.dry_run)
+    with ExceptionFrame():
+        args = CLI.parse_args()
+        unify(root=args.root, collection_paths=args.packages, copy=args.copy, dry_run=args.dry_run)
