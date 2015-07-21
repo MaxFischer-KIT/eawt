@@ -14,6 +14,8 @@ def write_unification(root, **kwargs):
     :param **kwargs: any arguments as received by :py:func:`unify`
     :return:
     """
+    if not os.path.exists(os.path.dirname(root)):
+        os.makedirs(os.path.dirname(root))
     unity_path = os.path.join(root, ".cmssw_py.uni")
     try:
         unity_file = os.fdopen(
@@ -22,7 +24,7 @@ def write_unification(root, **kwargs):
         )
     except OSError as err:
         if err.errno == errno.EEXIST:
-            raise ValueError("Directory already host a unification ('%s')"%unity_path)
+            raise ValueError("Directory already hosts a unification ('%s')"%unity_path)
         raise
     else:
         kwargs["root"] = root
@@ -54,30 +56,26 @@ def make_init(init_path, dry_run=False):
         return True
 
 
-def _make_target_tree(root_path, target_path, dry_run=False):
+def _link_package_py(root_path, target_path, source_path, dry_run=False):
+    _include_package_py(root_path, target_path, source_path, dry_run=dry_run, include_func=os.symlink, include_str="ln -s")
+
+def _copy_package_py(root_path, target_path, source_path, dry_run=False):
+    _include_package_py(root_path, target_path, source_path, dry_run=dry_run, include_func=shutil.copytree, include_str="cp -r")
+
+def _include_package_py(root_path, target_path, source_path, dry_run=False, include_func=None, include_str=None):
     if not os.path.isdir(os.path.dirname(target_path)):
         if not dry_run:
             os.makedirs(os.path.dirname(target_path))
         print "mkdir -p", os.path.dirname(target_path)
-    rel_target_dirs = os.path.relpath(target_path, root_path).split(os.sep)
-    for real_dir in [os.path.join(root_path, *rel_target_dirs[:idx+1]) for idx in range(len(rel_target_dirs))]:
-        make_init(os.path.join(real_dir, "__init__.py"), dry_run=dry_run)
-
-def _link_package_py(root_path, target_path, source_path, dry_run=False):
-    _make_target_tree(root_path, target_path, dry_run=dry_run)
-    print "%s -> %s" % (target_path, source_path)
+    print "%s %s %s" % (include_str, source_path, target_path)
     if not dry_run:
-        os.symlink(source_path, target_path)
+        include_func(source_path, target_path)
     for link_dir, link_subs, link_files in os.walk(source_path):
         make_init(os.path.join(link_dir, "__init__.py"), dry_run=dry_run)
 
-def _copy_package_py(root_path, target_path, source_path, dry_run=False):
-    _make_target_tree(root_path, target_path, dry_run=dry_run)
-    print "%s << %s" % (target_path, source_path)
-    if not dry_run:
-        shutil.copytree(source_path, target_path)
-    for link_dir, link_subs, link_files in os.walk(target_path):
-        make_init(os.path.join(link_dir, "__init__.py"), dry_run=dry_run)
+    rel_target_dirs = os.path.relpath(target_path, root_path).split(os.sep)
+    for real_dir in [os.path.join(root_path, *rel_target_dirs[:idx+1]) for idx in range(len(rel_target_dirs))]:
+        make_init(os.path.join(real_dir, "__init__.py"), dry_run=dry_run)
 
 
 def unify(root, cmssw_dir=None, collection_paths=(), copy=False, dry_run=False):
@@ -96,7 +94,8 @@ def unify(root, cmssw_dir=None, collection_paths=(), copy=False, dry_run=False):
     """
     print "Creating", root
     print "Linking", collection_paths
-    write_unification(root=root, collection_paths=collection_paths)
+    if not dry_run:
+        write_unification(root=root, collection_paths=collection_paths)
     if isinstance(collection_paths, basestring):
         raise ValueError
     if not collection_paths:
