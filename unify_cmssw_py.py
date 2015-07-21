@@ -14,8 +14,8 @@ def write_unification(root, **kwargs):
     :param **kwargs: any arguments as received by :py:func:`unify`
     :return:
     """
-    if not os.path.exists(os.path.dirname(root)):
-        os.makedirs(os.path.dirname(root))
+    if not os.path.exists(root):
+        os.makedirs(root)
     unity_path = os.path.join(root, ".cmssw_py.uni")
     try:
         unity_file = os.fdopen(
