@@ -14,6 +14,7 @@ def write_unification(root, **kwargs):
     :param **kwargs: any arguments as received by :py:func:`unify`
     :return:
     """
+    root = root.rstrip(os.sep)
     if not os.path.exists(root):
         os.makedirs(root)
     unity_path = os.path.join(root, ".cmssw_py.uni")
