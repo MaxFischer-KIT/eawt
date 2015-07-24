@@ -86,25 +86,45 @@ def gc_var_or_callable_parameter(gc_var_name, callable, gc_var_str="@", var_type
               2. There may be no equal sign ``=`` (as a string, syntactic element,
                  etc.) between the equal sign assigning this function to
                  ``callable``\ s parameter.
+
+              3. If the function is bound to another name (e.g. via
+                 ``from X import Y as Z``) then only the name in the closest
+                 scope (local, global, module) may be used.
     """
     # extract callable signature
     args, _, _, defaults = inspect.getargspec(callable)
     # extract the variable name from the callstack:
     #  1. Look at the frame calling this function
-    #  2. Read the source code where this function is called
-    #  3. Backtrack the source code until an assignment via ``=`` is done
-    #  4. Set the first non-whitespace character sequence as the parameter name
+    #  2. Guess the name this function is bound to
+    #  3. Read the source code where this function is called
+    #  4. Backtrack the source code until the function is called by name
+    #  5. Backtrack the source code until an assignment via ``=`` is done
+    #  6. Set the first non-whitespace character sequence as the parameter name
     call_frame = sys._getframe(1)
+    try:
+        self_name = [lcl for lcl in call_frame.f_locals if call_frame.f_locals[lcl] is gc_var_or_callable_parameter][0]
+    except IndexError:
+        try:
+            self_name = [gbl for gbl in call_frame.f_globals if call_frame.f_globals[gbl] is gc_var_or_callable_parameter][0]
+        except IndexError:
+            self_name = gc_var_or_callable_parameter.__name__
+    self_called = False
     var_assigned = False
     # variable assignment and name might be on different lines, so backtrack a little if needed
     for backtrack in range(8):
+        # always ignore comments
         call_line = linecache.getline(call_frame.f_code.co_filename, call_frame.f_lineno-backtrack).partition("#")[0].strip()
-        # variable name is always before assignment operator
-        if "=" in call_line:
+        # variable name we are assigned to must be before our name
+        if self_name in call_line:
+            self_called = True
+            call_line = call_line.partition(self_name)[0].strip()
+        # variable name is always before assignment operator, fast forward there
+        if self_called and "=" in call_line:
             var_assigned = True
-            call_line = call_line.partition("=")[0].strip()
+            call_line = call_line.rpartition("=")[0].strip()
+        # variable name is the next name
         if var_assigned and call_line:
-            var_name = call_line.rsplit(None, 1)[-1]
+            var_name = call_line.rsplit(None, 1)[-1].strip("()")
             break
     else:
         raise ValueError("GC Tools failed to find variable name in calling frame")
