@@ -5,7 +5,7 @@ Tools for integrating GC with python applications
 This is a standalone module.
 
 :warning: Since an application on a remote system does not have access to the
-    grid-control repository at runtime, it is mandatory to include the relevant
+    original repository at runtime, it is mandatory to include the relevant
     functions in your own codebase.
 """
 
