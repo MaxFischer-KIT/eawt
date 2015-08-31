@@ -1,4 +1,9 @@
 #!/usr/bin/python
+"""
+Clone the output from a GC job to another location
+
+
+"""
 # standard library imports
 import argparse
 import os
@@ -17,7 +22,8 @@ CLI = argparse.ArgumentParser(
                 "the script hook pipeline.",
     epilog="This script should be called on the submission machine by GC\n"
            "as a hook and is then executed within the environment of the\n"
-           "GC process.\n"
+           "GC process. A job output directory is required to extract job\n"
+           "variables and status.\n"
            "\n"
            "The following GC environment variables are used:\n"
            "GC_WORKDIR - working directory\n"
@@ -59,6 +65,10 @@ if __name__ == "__main__":
     args = CLI.parse_args()
     output = "<no output>"
     gc_env = gc_tools.gc_job.GCJobMeta(os.environ["GC_WORKDIR"], os.environ["GC_MY_JOBID"])
+    if gc_env.exitcode != 0:
+        if args.verbose:
+            print "Ignoring failed Job", os.environ.get("GC_MY_JOBID", "<unknown>")
+        sys.exit(0)
     source_path = os.path.join(
         (args.source_storage or gc_env.environ["SE_OUTPUT_PATH"]),
         (args.file_names or gc_env.environ["SE_OUTPUT_PATTERN"])

@@ -7,6 +7,8 @@ class GCJobMeta(object):
         self.workdir = workdir
         self.output_dir = os.path.join(workdir, "output", "job_%d" % self.job_id)
         self.environ = GCJobEnviron(self.gc_stdout)
+        self._read_cache = {
+            "job.info": {}}
 
     def _outdir_filename(self, basename):
         return os.path.join(self.output_dir, basename)
@@ -18,6 +20,17 @@ class GCJobMeta(object):
     @property
     def gc_stderr(self):
         return self._outdir_filename("gc.stderr")
+
+    @property
+    def exitcode(self):
+        try:
+            return self._read_cache["job.info"]["EXITCODE"]
+        except KeyError:
+            with open(self._outdir_filename("job.info")) as job_info:
+                for line in job_info:
+                    if line.startswith("EXITCODE"):
+                        self._read_cache["job.info"]["EXITCODE"] = int(line.split("=", 1))
+            return self._read_cache["job.info"]["EXITCODE"]
 
 class GCJobEnviron(object):
     """
@@ -31,11 +44,12 @@ class GCJobEnviron(object):
         try:
             return self._env_cache[item]
         except KeyError:
-            for line in open(self._gc_stdout):
-                if not line.startswith("export"):
-                    continue
-                v_name, v_val = line[7:].split("=", 1)
-                self._env_cache[v_name] = ast.literal_eval(v_val)
+            with open(self._gc_stdout) as gc_stdout:
+                for line in gc_stdout:
+                    if not line.startswith("export"):
+                        continue
+                    v_name, v_val = line[7:].split("=", 1)
+                    self._env_cache[v_name] = ast.literal_eval(v_val)
             return self._env_cache[item]
 
     def get(self, item, default=None):
