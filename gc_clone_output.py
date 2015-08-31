@@ -69,7 +69,6 @@ if __name__ == "__main__":
     )
     try:
         output = subprocess.check_output(args.copy_via + [source_path, dest_path])
-        print args.copy_via + resolve_transfer(args.source_storage, args.dest_storage)
     except subprocess.CalledProcessError:
         print(output)
         sys.exit(1)
