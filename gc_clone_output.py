@@ -60,12 +60,12 @@ if __name__ == "__main__":
     output = "<no output>"
     gc_env = gc_tools.gc_job.GCJobMeta(os.environ["GC_WORKDIR"], os.environ["GC_MY_JOBID"])
     source_path = os.path.join(
-        getattr(args, "source_storage", gc_env.environ["SE_OUTPUT_PATH"]),
-        getattr(args, "file_names", gc_env.environ["SE_OUTPUT_PATTERN"])
+        (args.source_storage or gc_env.environ["SE_OUTPUT_PATH"]),
+        (args.file_names or gc_env.environ["SE_OUTPUT_PATTERN"])
     )
     dest_path = os.path.join(
         args.dest_storage,
-        getattr(args, "file_names", gc_env.environ["SE_OUTPUT_PATTERN"])
+        (args.file_names or gc_env.environ["SE_OUTPUT_PATTERN"])
     )
     try:
         output = subprocess.check_output(args.copy_via + [source_path, dest_path])
