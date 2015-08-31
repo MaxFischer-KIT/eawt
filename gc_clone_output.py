@@ -1,8 +1,14 @@
 #!/usr/bin/python
+# standard library imports
 import argparse
 import os
 import subprocess
 import sys
+
+# third party imports
+
+# application/library imports
+import py_compat
 
 CLI = argparse.ArgumentParser(
     formatter_class=argparse.RawDescriptionHelpFormatter,
