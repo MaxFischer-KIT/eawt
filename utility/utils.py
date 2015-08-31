@@ -1,5 +1,7 @@
 
 # standard library imports
+import os
+import shutil
 import collections
 
 # third party imports
@@ -7,6 +9,8 @@ import collections
 # application/library imports
 
 # TODO: Add FlatList class
+
+
 def flatten(*args):
     """Returns a flat list, resolving **any** non-string, non-mapping iterable"""
     if isinstance(args, basestring):
@@ -21,3 +25,11 @@ def flatten(*args):
         except TypeError:
             retList.append(thing)
     return retList
+
+
+def ensure_rm(path):
+    """Ensure that a path does not exist"""
+    if os.path.isfile(path) or os.path.islink(path):
+        os.unlink(path)
+    elif os.path.isdir(path):
+        shutil.rmtree(path)
