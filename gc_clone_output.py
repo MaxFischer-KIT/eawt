@@ -9,21 +9,19 @@ import sys
 
 # application/library imports
 import py_compat
+import gc_tools.gc_job
 
 CLI = argparse.ArgumentParser(
     formatter_class=argparse.RawDescriptionHelpFormatter,
-                # ------------------------------------------------------------ #
     description="Transfer and clone output from a grid-control job as part of\n"
                 "the script hook pipeline.",
-           # ------------------------------------------------------------ #
     epilog="This script should be called on the submission machine by GC\n"
            "as a hook and is then executed within the environment of the\n"
            "GC process.\n"
            "\n"
            "The following GC environment variables are used:\n"
-           "GC_SE_OUTPUT_PATTERN - name of output file(s) to transfer\n"
-           "GC_SE_OUTPUT_PATH - base path of output\n"
-           "GC_MY_JOBID - (-v only) GC job number\n"
+           "GC_WORKDIR - working directory\n"
+           "GC_MY_JOBID - job number\n"
 )
 CLI.add_argument(
     "dest_storage",
@@ -32,14 +30,12 @@ CLI.add_argument(
 CLI.add_argument(
     "--source-storage",
     nargs="?",
-    help="overwrite base path of data storage. Default: %(default)s",
-    default=os.environ.get("GC_SE_OUTPUT_PATH", "").split() or "<$GC_SE_OUTPUT_PATH>",
+    help="overwrite base path of data storage. [<GC Job: $SE_OUTPUT_PATH>]",
 )
 CLI.add_argument(
     "--file-names",
     nargs="?",
-    help="overwrite base path of data storage. Default: %(default)s",
-    default=os.environ.get("GC_SE_OUTPUT_PATTERN", "").split() or "<$GC_SE_OUTPUT_PATTERN>",
+    help="overwrite base path of data storage. [<GC Job: $SE_OUTPUT_PATTERN>]",
 )
 CLI.add_argument(
     "-v",
@@ -54,6 +50,7 @@ CLI.add_argument(
     default=["rsync", "-aPp"],
 )
 
+
 def resolve_transfer(source_storage, dest_storage):
     output_name = os.environ["GC_SE_OUTPUT_PATTERN"]
     return [source_storage + "/" + output_name, dest_storage + "/" + output_name]
@@ -61,8 +58,17 @@ def resolve_transfer(source_storage, dest_storage):
 if __name__ == "__main__":
     args = CLI.parse_args()
     output = "<no output>"
+    gc_env = gc_tools.gc_job.GCJobMeta(os.environ["GC_WORKDIR"], os.environ["GC_MY_JOBID"])
+    source_path = os.path.join(
+        getattr(args, "source_storage", gc_env.environ["SE_OUTPUT_PATH"]),
+        getattr(args, "file_names", gc_env.environ["SE_OUTPUT_PATTERN"])
+    )
+    dest_path = os.path.join(
+        args.dest_storage,
+        getattr(args, "file_names", gc_env.environ["SE_OUTPUT_PATTERN"])
+    )
     try:
-        output = subprocess.check_output(args.copy_via + resolve_transfer(args.source_storage, args.dest_storage))
+        output = subprocess.check_output(args.copy_via + [source_path, dest_path])
         print args.copy_via + resolve_transfer(args.source_storage, args.dest_storage)
     except subprocess.CalledProcessError:
         print(output)
