@@ -34,6 +34,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
     'sphinx.ext.intersphinx',
+    'sphinxarg.ext',
 ]
 # extension config
 intersphinx_mapping = {'python': ('https://docs.python.org/2.7/', None)}

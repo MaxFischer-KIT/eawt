@@ -11,6 +11,13 @@ import subprocess
 
 # third party imports
 import sphinx
+# check for sphinx modules to be available
+for module_name, pip_name in (("sphinxarg", "sphinx-argparse"),):
+    try:
+        __import__(module_name)
+    except ImportError:
+        print("Installing missing module via pip: %s (%s)"%(pip_name, module_name))
+        subprocess.check_output(["pip", "install", pip_name])
 
 # application/library imports
 
@@ -48,7 +55,7 @@ def report(level, message, *args):
 def report_file(level):
     if options.verbosity >= level:
         return sys.stderr
-    return open("/dev/null")
+    return open("/dev/null", "w")
 
 if __name__ == "__main__":
     options = CLI.parse_args()

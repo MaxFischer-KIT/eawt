@@ -6,12 +6,17 @@
 EKP Analysis Workflow Tools
 ===========================
 
-Manual Pages
-------------
+Usage References
+----------------
 
 The following ``man`` pages are available:
 
 * :doc:`eawt`
+
+The following applications are available:
+
+* :mod:`gc_clone_output`
+* :mod:`prune_empty_root`
 
 Indices and tables
 ==================
