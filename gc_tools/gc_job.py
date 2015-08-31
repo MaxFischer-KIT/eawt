@@ -29,7 +29,7 @@ class GCJobMeta(object):
             with open(self._outdir_filename("job.info")) as job_info:
                 for line in job_info:
                     if line.startswith("EXITCODE"):
-                        self._read_cache["job.info"]["EXITCODE"] = int(line.split("=", 1))
+                        self._read_cache["job.info"]["EXITCODE"] = int(line.split("=", 1)[-1])
             return self._read_cache["job.info"]["EXITCODE"]
 
 class GCJobEnviron(object):

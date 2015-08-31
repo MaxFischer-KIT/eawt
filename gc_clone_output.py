@@ -63,20 +63,22 @@ def resolve_transfer(source_storage, dest_storage):
 
 if __name__ == "__main__":
     args = CLI.parse_args()
-    output = "<no output>"
-    gc_env = gc_tools.gc_job.GCJobMeta(os.environ["GC_WORKDIR"], os.environ["GC_MY_JOBID"])
-    if gc_env.exitcode != 0:
+    # read job meta information
+    gc_job_meta = gc_tools.gc_job.GCJobMeta(os.environ["GC_WORKDIR"], os.environ["GC_MY_JOBID"])
+    if gc_job_meta.exitcode != 0:
         if args.verbose:
-            print "Ignoring failed Job", os.environ.get("GC_MY_JOBID", "<unknown>")
+            print "Ignoring failed Job", gc_job_meta.job_id
         sys.exit(0)
     source_path = os.path.join(
-        (args.source_storage or gc_env.environ["SE_OUTPUT_PATH"]),
-        (args.file_names or gc_env.environ["SE_OUTPUT_PATTERN"])
+        (args.source_storage or gc_job_meta.environ["SE_OUTPUT_PATH"]),
+        (args.file_names or gc_job_meta.environ["SE_OUTPUT_PATTERN"])
     )
     dest_path = os.path.join(
         args.dest_storage,
-        (args.file_names or gc_env.environ["SE_OUTPUT_PATTERN"])
+        (args.file_names or gc_job_meta.environ["SE_OUTPUT_PATTERN"])
     )
+    # clone
+    output = "<no output>"
     try:
         output = subprocess.check_output(args.copy_via + [source_path, dest_path])
     except subprocess.CalledProcessError:
@@ -84,4 +86,4 @@ if __name__ == "__main__":
         sys.exit(1)
     else:
         if args.verbose:
-            print "Cloned output for Job", os.environ.get("GC_MY_JOBID", "<unknown>")
+            print "Cloned output for Job", gc_job_meta.job_id
