@@ -2,7 +2,8 @@
 # standard library imports
 try:
     import ROOT
-    # disable root warnings
+    # suppress ROOT output
+    ROOT.PyConfig.IgnoreCommandLineOptions = True
     ROOT.gErrorIgnoreLevel = ROOT.kError
 except ImportError:
     ROOT = None

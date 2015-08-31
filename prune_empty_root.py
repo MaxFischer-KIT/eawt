@@ -1,10 +1,11 @@
 #!/usr/bin/python
-import ROOT
 import argparse
 import glob
 import itertools
 import os
-
+import ROOT
+# suppress ROOT output
+ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.gErrorIgnoreLevel = ROOT.kError
 
 def file_has_events(file_path, branch_name):
