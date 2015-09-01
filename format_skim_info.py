@@ -5,6 +5,10 @@ Compile information from skims for overviews
 
 :warning: Currently, skims and directories are expected to have a unique 1:1
           relation. This constraint will likely be dropped in the future.
+**Requires**
+
+:py:mod:`argparse`
+:py:mod:`ROOT` (optional)
 
 **Arguments**
 
