@@ -79,5 +79,5 @@ if __name__ == "__main__":
             print "rm", file_path
             if not args.dry_run:
                 os.unlink(file_path)
-            if progress is not None:
-                progress.step()
+        if progress is not None:
+            progress.step()
