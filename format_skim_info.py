@@ -1,5 +1,17 @@
 #!/usr/bin/python
 # standard library imports
+"""
+Compile information from skims for overviews
+
+:warning: Currently, skims and directories are expected to have a unique 1:1
+          relation. This constraint will likely be dropped in the future.
+
+**Arguments**
+
+.. argparse::
+   :ref: gc_clone_output.CLI
+   :prog: gc_clone_output
+"""
 try:
     import ROOT
     # suppress ROOT output
@@ -39,7 +51,7 @@ else:
 
 CLI = argparse.ArgumentParser(
     description="Pretty-Print information on skims",
-    epilog="This script will decent into subdirectories of DATAPATH, looking "
+    epilog="This script will descend into subdirectories of DATAPATH, looking "
            "for any folders containing files matching the glob '*.root'. Each "
            "folder is then considered a skim and information is pulled from "
            "all files in the folder."

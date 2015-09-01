@@ -1,14 +1,28 @@
 #!/usr/bin/python
+"""
+**Remove empty root files from folders**
+
+Inspects files for content, looking for any that do not contain events.
+
+**Arguments**
+
+.. argparse::
+   :ref: gc_clone_output.CLI
+   :prog: gc_clone_output
+"""
 import argparse
 import glob
 import itertools
 import os
-import ROOT
-# suppress ROOT output
-ROOT.PyConfig.IgnoreCommandLineOptions = True
-ROOT.gErrorIgnoreLevel = ROOT.kError
+try:
+    import ROOT
+    # suppress ROOT output
+    ROOT.PyConfig.IgnoreCommandLineOptions = True
+    ROOT.gErrorIgnoreLevel = ROOT.kError
+except ImportError:
+    ROOT = None
 
-def file_has_events(file_path, branch_name):
+def _file_has_events(file_path, branch_name):
     try:
         data = ROOT.TFile(file_path)
         return data.Get(branch_name).GetEntries() > 0
@@ -39,9 +53,11 @@ CLI.add_argument(
 )
 
 if __name__ == "__main__":
+    if ROOT is None:
+        raise ImportError("Module ROOT is not available")
     args = CLI.parse_args()
     for file_path in itertools.chain(*(glob.glob(cand) for cand in args.files)):
-        if not file_has_events(file_path, args.branch_name):
+        if not _file_has_events(file_path, args.branch_name):
             print "rm", file_path
             if not args.dry_run:
                 os.unlink(file_path)

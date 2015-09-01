@@ -1,8 +1,30 @@
 #!/usr/bin/python
 """
-Clone the output from a GC job to another location
+**Clones the output from a GC job to another location**
 
+This application is an event hook for grid-control, cloning job output to other
+locations or remote sites. The app must be called from grid-control as a hook::
 
+  [job]
+  monitor = scripts
+
+  [events]
+  silent = False
+  on output = gc_clone_output.py analysis_host:/remote/skim/storage
+
+Additional options may be set by appending them to the ``on output`` call. For
+example, if a job writes to a site's dCache which is locally mounted on the
+submit host, ``--source-storage /pnfs/foo/bar`` can often be used to access the
+files without grid tools.
+
+:note: Most transfer protocols require the remote directory to exist. There is
+       currently no way have the app create the remote directory implicitly.
+
+**Arguments**
+
+.. argparse::
+   :ref: gc_clone_output.CLI
+   :prog: gc_clone_output
 """
 # standard library imports
 import argparse
@@ -56,10 +78,6 @@ CLI.add_argument(
     default=["rsync", "-aPp"],
 )
 
-
-def resolve_transfer(source_storage, dest_storage):
-    output_name = os.environ["GC_SE_OUTPUT_PATTERN"]
-    return [source_storage + "/" + output_name, dest_storage + "/" + output_name]
 
 if __name__ == "__main__":
     args = CLI.parse_args()

@@ -17,6 +17,7 @@ The following applications are available:
 
 * :mod:`gc_clone_output`
 * :mod:`prune_empty_root`
+* :mod:`format_skim_info`
 
 Indices and tables
 ==================
