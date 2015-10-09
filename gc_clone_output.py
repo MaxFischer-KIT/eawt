@@ -75,7 +75,7 @@ CLI.add_argument(
     "--copy-via",
     nargs=argparse.REMAINDER,
     help="command(s) to use for copying. Default: %(default)s",
-    default=["rsync", "-aPp"],
+    default=["rsync", "-aPRp"],
 )
 
 
@@ -87,8 +87,10 @@ if __name__ == "__main__":
         if args.verbose:
             print "Ignoring failed Job", gc_job_meta.job_id
         sys.exit(0)
+    # joining with '.' to file name allows rsync to create containing directories
     source_path = os.path.join(
         (args.source_storage or gc_job_meta.environ["SE_OUTPUT_PATH"]),
+        '.',
         (args.file_names or gc_job_meta.environ["SE_OUTPUT_PATTERN"])
     )
     dest_path = os.path.join(
