@@ -98,8 +98,7 @@ if __name__ == "__main__":
         (args.file_names or gc_job_meta.environ["SE_OUTPUT_PATTERN"])
     )
     dest_path = os.path.join(
-        args.dest_storage,
-        (args.file_names or gc_job_meta.environ["SE_OUTPUT_PATTERN"])
+        args.dest_storage
     )
     # clone
     output = "<no output>"
