@@ -31,6 +31,7 @@ import argparse
 import os
 import subprocess
 import sys
+import time
 
 # third party imports
 
@@ -79,7 +80,7 @@ CLI.add_argument(
 )
 
 def vprint(job_meta, message):
-    print "-- gc_clone_output -- Job %4d" % job_meta.job_id, message
+    print time.strftime("%Y-%m-%d %H:%M:%S"), "-", "Job", "%-4d" % job_meta.job_id, message
 
 
 if __name__ == "__main__":
@@ -88,7 +89,7 @@ if __name__ == "__main__":
     gc_job_meta = gc_tools.gc_job.GCJobMeta(os.environ["GC_WORKDIR"], os.environ["GC_MY_JOBID"])
     if gc_job_meta.exitcode != 0:
         if args.verbose:
-            vprint(gc_job_meta, "ignored due to failure")
+            vprint(gc_job_meta, "output cloning SKIPPED")
         sys.exit(0)
     # joining with '.' to file name allows rsync to create containing directories
     source_path = os.path.join(
@@ -109,4 +110,4 @@ if __name__ == "__main__":
         sys.exit(1)
     else:
         if args.verbose:
-            vprint(gc_job_meta, "transfered successfuly")
+            vprint(gc_job_meta, "output cloning SUCCESS")
