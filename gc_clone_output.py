@@ -75,7 +75,7 @@ CLI.add_argument(
     "--copy-via",
     nargs=argparse.REMAINDER,
     help="command(s) to use for copying. Default: %(default)s",
-    default=["rsync", "-aPRp"],
+    default=["rsync", "-aPp", "--relative"],
 )
 
 
