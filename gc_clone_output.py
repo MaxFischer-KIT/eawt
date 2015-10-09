@@ -78,6 +78,9 @@ CLI.add_argument(
     default=["rsync", "-aPp", "--relative"],
 )
 
+def vprint(job_meta, message):
+    print "-- gc_clone_output -- Job %4d" % job_meta.job_id, message
+
 
 if __name__ == "__main__":
     args = CLI.parse_args()
@@ -85,7 +88,7 @@ if __name__ == "__main__":
     gc_job_meta = gc_tools.gc_job.GCJobMeta(os.environ["GC_WORKDIR"], os.environ["GC_MY_JOBID"])
     if gc_job_meta.exitcode != 0:
         if args.verbose:
-            print "Ignoring failed Job", gc_job_meta.job_id
+            vprint(gc_job_meta, "ignored due to failure")
         sys.exit(0)
     # joining with '.' to file name allows rsync to create containing directories
     source_path = os.path.join(
@@ -99,10 +102,11 @@ if __name__ == "__main__":
     )
     # clone
     output = "<no output>"
-    if args.verbose:
-        print "Job", gc_job_meta.job_id, ":", " ".join(args.copy_via + [source_path, dest_path])
     try:
         output = subprocess.check_output(args.copy_via + [source_path, dest_path])
     except subprocess.CalledProcessError:
         print(output)
         sys.exit(1)
+    else:
+        if args.verbose:
+            vprint(gc_job_meta, "transfered successfuly")
