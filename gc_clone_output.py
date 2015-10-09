@@ -99,11 +99,10 @@ if __name__ == "__main__":
     )
     # clone
     output = "<no output>"
+    if args.verbose:
+        print "Job", gc_job_meta.job_id, ":", " ".join(args.copy_via + [source_path, dest_path])
     try:
         output = subprocess.check_output(args.copy_via + [source_path, dest_path])
     except subprocess.CalledProcessError:
         print(output)
         sys.exit(1)
-    else:
-        if args.verbose:
-            print "Cloned output for Job", gc_job_meta.job_id
